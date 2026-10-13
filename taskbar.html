@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Navigare</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .navigation,
+    .more-menu {
+      pointer-events: auto;
+    }
+
+    .navigation {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      left: 12px;
+      z-index: 2;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      max-width: 520px;
+      margin: auto;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 28px;
+      background: rgba(13,18,29,.94);
+      box-shadow: 0 15px 45px rgba(0,0,0,.55);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 44px;
+      color: #98a4b8;
+      border: 0;
+      border-radius: 17px;
+      background: transparent;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      color: #65e8ff;
+      background: rgba(101,232,255,.13);
+    }
+
+    .nav-item svg {
+      width: 23px;
+      height: 23px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .more-menu {
+      position: absolute;
+      right: 18px;
+      bottom: 76px;
+      z-index: 3;
+      display: none;
+      width: min(350px, calc(100% - 36px));
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 22px;
+      background: rgba(13,18,29,.97);
+      box-shadow: 0 20px 55px rgba(0,0,0,.65);
+      backdrop-filter: blur(22px);
+    }
+
+    .more-menu.open {
+      display: grid;
+    }
+
+    .more-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 9px;
+      color: #edf3ff;
+      font-size: .76rem;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .more-item:hover {
+      border-color: rgba(101,232,255,.5);
+      background: rgba(101,232,255,.12);
+    }
+
+    .more-item svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #65e8ff;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="more-menu" id="moreMenu">
+    <a class="more-item" href="partituri.html" target="_top">Partituri</a>
+    <a class="more-item" href="rec.html" target="_top">Înregistrări</a>
+    <a class="more-item" href="pian.html" target="_top">Pian digital</a>
+    <a class="more-item" href="compune.html" target="_top">Creează partitură</a>
+    <a class="more-item" href="setari.html" target="_top" style="grid-column:span 2">Setări și cont</a>
+  </div>
+
+  <nav class="navigation" aria-label="Navigarea aplicației">
+    <a class="nav-item active" href="metronom.html" target="_top" title="Metronom" aria-label="Metronom">
+      <svg viewBox="0 0 24 24">
+        <path d="M7 21h10L15.5 8h-7z"></path>
+        <path d="m12 17 3-8"></path>
+        <circle cx="12" cy="17" r="1"></circle>
+        <path d="M8 5h8"></path>
+      </svg>
+    </a>
+
+    <a class="nav-item" href="practice-history.html" target="_top" title="Istoric de studiu" aria-label="Istoric de studiu">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 7v5l3 2"></path>
+      </svg>
+    </a>
+
+    <a class="nav-item" href="tuner.html" target="_top" title="Tuner" aria-label="Tuner">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"></path>
+      </svg>
+    </a>
+
+    <a class="nav-item" href="teorie.html" target="_top" title="Teorie" aria-label="Teorie">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 3h14v18H7a2 2 0 0 1-2-2z"></path>
+        <path d="M8 8h8M8 12h8M8 16h5"></path>
+      </svg>
+    </a>
+
+    <button
+      class="nav-item"
+      id="moreButton"
+      type="button"
+      title="Mai mult"
+      aria-label="Mai mult"
+      aria-expanded="false">
+      <svg viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1"></circle>
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+      </svg>
+    </button>
+  </nav>
+
+  <script>
+    const moreButton = document.getElementById("moreButton");
+    const moreMenu = document.getElementById("moreMenu");
+
+    moreButton.addEventListener("click", function () {
+      const isOpen = moreMenu.classList.toggle("open");
+      moreButton.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!moreButton.contains(event.target) && !moreMenu.contains(event.target)) {
+        moreMenu.classList.remove("open");
+        moreButton.setAttribute("aria-expanded", "false");
+      }
+    });
+  </script>
+</body>
+</html>

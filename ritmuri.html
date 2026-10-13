@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ritmuri</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --text: #edf4ff;
+      --muted: #98a9c4;
+      --cyan: #63eaff;
+      --blue: #4785ff;
+      --purple: #a894ff;
+      --line: rgba(176, 209, 255, .16);
+      --glass: rgba(13, 23, 43, .78);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 16px 130px;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 12% 8%, rgba(53, 105, 208, .3), transparent 42%),
+        radial-gradient(ellipse at 90% 55%, rgba(57, 201, 231, .13), transparent 38%),
+        linear-gradient(145deg, #070b14, #0b1220 55%, #080d17);
+    }
+
+    button, select, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-button,
+    .edit-button,
+    .secondary-button,
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 18px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .055);
+      text-decoration: none;
+      transition: .18s ease;
+    }
+
+    .back-button:hover,
+    .edit-button:hover,
+    .secondary-button:hover {
+      border-color: rgba(99, 234, 255, .5);
+      background: rgba(99, 234, 255, .1);
+      transform: translateY(-1px);
+    }
+
+    .edit-button svg,
+    .back-button svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .edit-button {
+      color: #d2caff;
+    }
+
+    .panel {
+      overflow: hidden;
+      padding: clamp(20px, 4vw, 34px);
+      border: 1px solid rgba(176, 209, 255, .17);
+      border-radius: 30px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)),
+        var(--glass);
+      box-shadow: 0 28px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.08);
+      backdrop-filter: blur(24px);
+    }
+
+    .heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .heading-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 48px;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(99,234,255,.24);
+      border-radius: 16px;
+      color: var(--cyan);
+      background: linear-gradient(145deg, rgba(99,234,255,.16), rgba(71,133,255,.08));
+      box-shadow: 0 0 26px rgba(99,234,255,.09);
+    }
+
+    .heading-icon svg {
+      width: 25px;
+      height: 25px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      margin: 0;
+      color: #d9e8ff;
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      letter-spacing: .04em;
+    }
+
+    .subtitle {
+      margin: 0 0 24px 62px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 9px;
+      padding: 15px;
+      border: 1px solid rgba(176,209,255,.12);
+      border-radius: 19px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .field-label {
+      color: #bdcbe0;
+      font-size: .83rem;
+      font-weight: 600;
+    }
+
+    select {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 12px;
+      color: var(--text);
+      border: 1px solid rgba(176,209,255,.18);
+      border-radius: 12px;
+      outline: none;
+      background: #111c30;
+    }
+
+    select:focus,
+    input:focus {
+      outline: 2px solid rgba(99,234,255,.35);
+      outline-offset: 2px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--cyan);
+    }
+
+    .bpm-readout {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .bpm-readout strong {
+      color: var(--cyan);
+      font-size: 1rem;
+    }
+
+    .beat-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      min-height: 52px;
+      margin: 24px 0;
+    }
+
+    .beat-dot {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      color: #a7b6cc;
+      font-size: .83rem;
+      font-weight: 700;
+      border: 1px solid rgba(176,209,255,.17);
+      border-radius: 15px;
+      background: rgba(255,255,255,.045);
+      transition: .1s ease;
+    }
+
+    .beat-dot.strong {
+      color: #04121c;
+      border-color: transparent;
+      background: linear-gradient(145deg, #70f0ff, #48aaff);
+      box-shadow: 0 0 19px rgba(99,234,255,.22);
+    }
+
+    .beat-dot.soft {
+      color: #c3d3eb;
+      border-color: rgba(168,148,255,.35);
+      background: rgba(168,148,255,.12);
+    }
+
+    .beat-dot.playing {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+      transform: scale(1.08);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .primary-button {
+      min-width: 120px;
+      color: #06101a;
+      font-weight: 700;
+      border: 0;
+      background: linear-gradient(110deg, #72f0ff, #6a9dff);
+      box-shadow: 0 8px 26px rgba(71,133,255,.2);
+    }
+
+    .primary-button:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .primary-button.stop {
+      color: #fff;
+      background: linear-gradient(110deg, #d32f2f, #ff4d6d);
+      box-shadow: 0 8px 26px rgba(255,77,109,.35);
+    }
+
+    .status {
+      min-height: 20px;
+      margin-top: 12px;
+      color: var(--muted);
+      text-align: center;
+      font-size: .8rem;
+    }
+
+    .editor {
+      display: none;
+      margin-top: 25px;
+      padding: 20px;
+      border: 1px solid rgba(168,148,255,.23);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(168,148,255,.09), rgba(99,234,255,.035));
+    }
+
+    .editor.open {
+      display: block;
+    }
+
+    .editor-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .editor-header svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: var(--purple);
+      stroke-width: 1.8;
+    }
+
+    h2 {
+      margin: 0;
+      color: #ded8ff;
+      font-size: 1.05rem;
+    }
+
+    .editor-note {
+      margin: 0 0 15px;
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.45;
+    }
+
+    .beat-editor {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .beat-edit {
+      min-height: 48px;
+      padding: 10px 0;
+      color: #d7e4f8;
+      font-size: 1rem;
+      font-weight: 700;
+      border: 1px solid rgba(176,209,255,.16);
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+      transition: .12s ease;
+    }
+
+    .beat-edit:hover {
+      transform: translateY(-1px);
+      border-color: rgba(99, 234, 255, .4);
+    }
+
+    .beat-edit.strong {
+      color: #06121b;
+      border-color: transparent;
+      background: linear-gradient(145deg, #70f0ff, #48aaff);
+      box-shadow: 0 0 16px rgba(99,234,255,.2);
+    }
+
+    .editor-controls {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .name-input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 12px;
+      color: var(--text);
+      border: 1px solid rgba(176,209,255,.18);
+      border-radius: 12px;
+      background: #111c30;
+    }
+
+    .history {
+      margin-top: 19px;
+      padding-top: 17px;
+      border-top: 1px solid rgba(176,209,255,.14);
+    }
+
+    .history-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 11px;
+    }
+
+    .history-title svg {
+      width: 19px;
+      height: 19px;
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 1.8;
+    }
+
+    .saved-list {
+      display: grid;
+      gap: 9px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .saved-item {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 11px;
+      border: 1px solid rgba(176,209,255,.12);
+      border-radius: 15px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .saved-name {
+      color: #eef5ff;
+      font-size: .86rem;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .saved-detail {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .73rem;
+      font-weight: 400;
+    }
+
+    .small-action {
+      min-height: 36px;
+      padding: 7px 10px;
+      color: var(--text);
+      border: 1px solid rgba(176,209,255,.18);
+      border-radius: 11px;
+      background: rgba(255,255,255,.055);
+      font-size: .76rem;
+    }
+
+    .small-action.apply {
+      color: #07131d;
+      border: 0;
+      background: linear-gradient(110deg,#72f0ff,#6a9dff);
+      font-weight: 700;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .tools-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .tool-link {
+      display: grid;
+      justify-items: center;
+      gap: 7px;
+      padding: 13px 6px;
+      color: #c8d7ee;
+      text-align: center;
+      text-decoration: none;
+      font-size: .74rem;
+      border: 1px solid rgba(176,209,255,.13);
+      border-radius: 17px;
+      background: rgba(255,255,255,.035);
+      transition: .18s ease;
+    }
+
+    .tool-link:hover {
+      color: var(--cyan);
+      border-color: rgba(99,234,255,.38);
+      background: rgba(99,234,255,.075);
+      transform: translateY(-2px);
+    }
+
+    .tool-link svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      right: 0;
+      left: 0;
+      bottom: 12px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 90%;
+      max-width: 360px;
+      margin: 0 auto;
+      padding: 6px 10px;
+      border: 1px solid rgba(176,209,255,.2);
+      border-radius: 26px;
+      background: rgba(10,16,29,.95);
+      box-shadow: 0 10px 30px rgba(0,0,0,.6);
+      backdrop-filter: blur(20px);
+    }
+
+    .bottom-nav a {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 44px;
+      color: #9daec8;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: .2s ease;
+    }
+
+    .bottom-nav a:hover,
+    .bottom-nav a.active {
+      color: var(--cyan);
+      background: rgba(99,234,255,.14);
+      box-shadow: 0 0 15px rgba(99,234,255,.2);
+    }
+
+    .bottom-nav svg {
+      width: 25px;
+      height: 25px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 520px) {
+      .settings { grid-template-columns: 1fr; }
+      .subtitle { margin-left: 0; }
+      .editor-controls { grid-template-columns: 1fr; }
+      .saved-item { grid-template-columns: minmax(0,1fr) auto; }
+      .saved-item .delete-button { grid-column: 2; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <div class="topbar">
+      <a class="back-button" href="metronom.html">
+        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6M9 12h12"></path></svg>
+        Înapoi
+      </a>
+
+      <button class="edit-button" id="editOpen" type="button">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"></path></svg>
+        Editare ritm
+      </button>
+    </div>
+
+    <section class="panel">
+      <div class="heading">
+        <div class="heading-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 19V8M9 19V4M14 19v-7M19 19V6"></path><path d="M2 20h20"></path></svg>
+        </div>
+        <h1>Ritmuri</h1>
+      </div>
+
+      <p class="subtitle">Alege măsura și tempoul, apoi testează accentele.</p>
+
+      <div class="settings">
+        <label class="field">
+          <span class="field-label">Măsura</span>
+          <select id="meter">
+            <option value="2">2/4</option>
+            <option value="3">3/4</option>
+            <option value="4" selected>4/4</option>
+            <option value="5">5/4</option>
+            <option value="6">6/8</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Tempou</span>
+          <span class="bpm-readout"><span>Viteză</span><strong id="bpmText">100 BPM</strong></span>
+          <input id="bpm" type="range" min="40" max="220" value="100">
+        </label>
+      </div>
+
+      <div class="beat-grid" id="beats"></div>
+
+      <div class="button-row">
+        <button class="primary-button" id="testButton" type="button">Start</button>
+        <button class="secondary-button" id="applyCurrent" type="button">Aplică la metronom</button>
+      </div>
+
+      <div class="status" id="status"></div>
+
+      <section class="editor" id="editor">
+        <div class="editor-header">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"></path></svg>
+          <h2>Editare ritm</h2>
+        </div>
+        <p class="editor-note">Apasă pe fiecare pătrățel ca să alegi dacă acea bătaie este tare sau încet.</p>
+
+        <div class="beat-editor" id="beatEditor"></div>
+
+        <div class="editor-controls">
+          <label class="field">
+            <span class="field-label">Sunet</span>
+            <select id="sound">
+              <option value="wood">Lemn</option>
+              <option value="block">Woodblock</option>
+              <option value="standard">Clasic</option>
+              <option value="clar">Clar</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Numele ritmului</span>
+            <input class="name-input" id="rhythmName" maxlength="30" placeholder="De exemplu: Ritm 1">
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button class="primary-button" id="saveButton" type="button">Salvează ritmul</button>
+        </div>
+
+        <div class="history">
+          <div class="history-title">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            <h2>Ritmurile mele</h2>
+          </div>
+          <div class="saved-list" id="savedRhythms"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="tools-panel" aria-label="Unelte">
+      <a class="tool-link" href="sunete.html">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        Sunete
+      </a>
+
+      <a class="tool-link" href="ritmuri.html">
+        <svg viewBox="0 0 24 24"><path d="M4 20V9M10 20V4M16 20v-7M22 20V6"></path></svg>
+        Ritmuri
+      </a>
+
+      <a class="tool-link" href="rec.html">
+        <svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="13" rx="4"></rect><path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3M9 22h6"></path></svg>
+        Înregistrări
+      </a>
+
+      <a class="tool-link" href="istoric.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        Istoric
+      </a>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Navigare">
+      <a href="metronom.html" title="Metronom">
+        <svg viewBox="0 0 24 24"><path d="M7 21h10L15.5 8h-7z"></path><path d="m12 17 3-8"></path><circle cx="12" cy="17" r="1"></circle></svg>
+      </a>
+      <a href="practice-history.html" title="Istoric de studiu">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      </a>
+      <a href="tuner.html" title="Tuner">
+        <svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"></path></svg>
+      </a>
+      <a href="teorie.html" title="Teorie">
+        <svg viewBox="0 0 24 24"><path d="M5 3h14v18H7a2 2 0 0 1-2-2z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
+      </a>
+    </nav>
+  </main>
+
+  <script>
+    const ACTIVE_KEY = "activeRhythmConfig";
+    const SAVED_KEY = "savedRhythms";
+
+    const meter = document.getElementById("meter");
+    const bpm = document.getElementById("bpm");
+    const bpmText = document.getElementById("bpmText");
+    const sound = document.getElementById("sound");
+    const beats = document.getElementById("beats");
+    const beatEditor = document.getElementById("beatEditor");
+    const editor = document.getElementById("editor");
+    const testButton = document.getElementById("testButton");
+    const status = document.getElementById("status");
+
+    let audioContext = null;
+    let running = false;
+    let timer = null;
+    let beatIndex = 0;
+    let pattern = [true, false, false, false];
+
+    function countBeats() {
+      return Number(meter.value);
+    }
+
+    function resizePattern() {
+      const count = countBeats();
+      pattern = Array.from({ length: count }, (_, index) => Boolean(pattern[index]));
+      if (!pattern.some(Boolean)) pattern[0] = true;
+    }
+
+    function drawBeats(activeIndex = -1) {
+      beats.innerHTML = "";
+
+      pattern.forEach((isStrong, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "beat-dot " + (isStrong ? "strong" : "soft");
+
+        if (index === activeIndex) {
+          button.classList.add("playing");
+        }
+
+        button.textContent = String(index + 1);
+        button.title = isStrong ? "Bătaie tare" : "Bătaie încet";
+
+        button.addEventListener("click", () => {
+          pattern[index] = !pattern[index];
+          drawBeats(activeIndex);
+          drawEditor();
+        });
+
+        beats.appendChild(button);
+      });
+    }
+
+    // Aici se desenează pătrățelele de editare doar cu numere, fără textul Tare/Încet
+    function drawEditor() {
+      beatEditor.innerHTML = "";
+
+      pattern.forEach((isStrong, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "beat-edit" + (isStrong ? " strong" : "");
+        button.textContent = String(index + 1); // Doar numărul, curat
+
+        button.addEventListener("click", () => {
+          pattern[index] = !pattern[index];
+          drawBeats();
+          drawEditor();
+        });
+
+        beatEditor.appendChild(button);
+      });
+    }
+
+    function getAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      return audioContext;
+    }
+
+    function playBeat(isStrong) {
+      const context = getAudioContext();
+      const now = context.currentTime;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
+      const selectedSound = sound.value;
+
+      if (selectedSound === "block") {
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(isStrong ? 950 : 720, now);
+        oscillator.frequency.exponentialRampToValueAtTime(180, now + 0.035);
+        gain.gain.setValueAtTime(isStrong ? 0.55 : 0.28, now);
+      } else if (selectedSound === "standard" || selectedSound === "clar") {
+        oscillator.type = "sine";
+        oscillator.frequency.value = selectedSound === "clar"
+          ? (isStrong ? 1450 : 1050)
+          : (isStrong ? 980 : 740);
+        gain.gain.setValueAtTime(isStrong ? 0.32 : 0.19, now);
+      } else {
+        oscillator.type = "triangle";
+        oscillator.frequency.setValueAtTime(isStrong ? 540 : 410, now);
+        oscillator.frequency.exponentialRampToValueAtTime(85, now + 0.04);
+        filter.type = "lowpass";
+        filter.frequency.value = isStrong ? 900 : 720;
+        gain.gain.setValueAtTime(isStrong ? 0.5 : 0.3, now);
+      }
+
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+      oscillator.connect(filter);
+      filter.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.09);
+    }
+
+    function playNextBeat() {
+      playBeat(Boolean(pattern[beatIndex]));
+      drawBeats(beatIndex);
+      beatIndex = (beatIndex + 1) % countBeats();
+    }
+
+    function startTest() {
+      if (running) return;
+
+      running = true;
+      beatIndex = 0;
+
+      testButton.textContent = "Stop";
+      testButton.classList.add("stop");
+
+      playNextBeat();
+      timer = setInterval(playNextBeat, 60000 / Number(bpm.value));
+    }
+
+    function stopTest() {
+      running = false;
+      clearInterval(timer);
+      timer = null;
+      beatIndex = 0;
+
+      testButton.textContent = "Start";
+      testButton.classList.remove("stop");
+
+      drawBeats();
+    }
+
+    function restartTest() {
+      if (!running) return;
+
+      clearInterval(timer);
+      beatIndex = 0;
+      playNextBeat();
+      timer = setInterval(playNextBeat, 60000 / Number(bpm.value));
+    }
+
+    function makeConfig(name) {
+      return {
+        name: name || "",
+        meter: countBeats(),
+        bpm: Number(bpm.value),
+        pattern: pattern.slice(),
+        sound: sound.value
+      };
+    }
+
+    function applyToMain(config) {
+      localStorage.setItem(ACTIVE_KEY, JSON.stringify(config));
+      localStorage.setItem("metronomeSoundType", config.sound);
+      window.location.href = "metronom.html";
+    }
+
+    function readSavedRhythms() {
+      try {
+        return JSON.parse(localStorage.getItem(SAVED_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function showSavedRhythms() {
+      const list = document.getElementById("savedRhythms");
+      const saved = readSavedRhythms();
+      list.innerHTML = "";
+
+      if (saved.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "Nu ai salvat încă niciun ritm.";
+        list.appendChild(empty);
+        return;
+      }
+
+      saved.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "saved-item";
+
+        const info = document.createElement("div");
+        info.className = "saved-name";
+        info.textContent = item.name || ("Ritm " + (index + 1));
+
+        const details = document.createElement("span");
+        details.className = "saved-detail";
+        details.textContent = item.meter + (item.meter === 6 ? "/8" : "/4") + " · " + item.bpm + " BPM";
+        info.appendChild(details);
+
+        const apply = document.createElement("button");
+        apply.type = "button";
+        apply.className = "small-action apply";
+        apply.textContent = "Aplică";
+        apply.addEventListener("click", () => applyToMain(item));
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "small-action delete-button";
+        remove.textContent = "Șterge";
+        remove.addEventListener("click", () => {
+          const updated = readSavedRhythms();
+          updated.splice(index, 1);
+          localStorage.setItem(SAVED_KEY, JSON.stringify(updated));
+          showSavedRhythms();
+        });
+
+        row.append(info, apply, remove);
+        list.appendChild(row);
+      });
+    }
+
+    meter.addEventListener("change", () => {
+      resizePattern();
+      drawBeats();
+      drawEditor();
+      restartTest();
+    });
+
+    bpm.addEventListener("input", () => {
+      bpmText.textContent = bpm.value + " BPM";
+      restartTest();
+    });
+
+    testButton.addEventListener("click", () => {
+      if (running) {
+        stopTest();
+      } else {
+        startTest();
+      }
+    });
+
+    document.getElementById("editOpen").addEventListener("click", () => {
+      editor.classList.toggle("open");
+      drawEditor();
+      showSavedRhythms();
+    });
+
+    document.getElementById("applyCurrent").addEventListener("click", () => {
+      applyToMain(makeConfig(""));
+    });
+
+    document.getElementById("saveButton").addEventListener("click", () => {
+      const saved = readSavedRhythms();
+      const nameInput = document.getElementById("rhythmName");
+      const name = nameInput.value.trim() || ("Ritm " + (saved.length + 1));
+      const config = makeConfig(name);
+
+      saved.unshift(config);
+      localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+      localStorage.setItem(ACTIVE_KEY, JSON.stringify(config));
+
+      nameInput.value = "";
+      status.textContent = name + " a fost salvat.";
+      showSavedRhythms();
+    });
+
+    try {
+      const active = JSON.parse(localStorage.getItem(ACTIVE_KEY));
+
+      if (active) {
+        meter.value = String(active.meter || 4);
+        bpm.value = String(active.bpm || 100);
+        sound.value = active.sound || "wood";
+        pattern = Array.isArray(active.pattern)
+          ? active.pattern.slice()
+          : [true, false, false, false];
+      }
+    } catch {}
+
+    bpmText.textContent = bpm.value + " BPM";
+    resizePattern();
+    drawBeats();
+    drawEditor();
+    showSavedRhythms();
+  </script>
+</body>
+</html>

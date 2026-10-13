@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Istoric metronom</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: 20px;
+      color: #edf3ff;
+      background: radial-gradient(ellipse at 15% 15%, #202a50 0%, transparent 45%), #080b12;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 440px;
+      padding: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(20px);
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #5fe8ff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: 0.15s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(95, 232, 255, 0.15);
+      transform: translateX(-2px);
+    }
+
+    .icon {
+      width: 50px;
+      height: 50px;
+      margin: 30px auto 10px;
+      color: #5fe8ff;
+      display: block;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      color: #a8c7ff;
+      font-size: 1.35rem;
+      text-align: center;
+    }
+
+    p {
+      margin: 0 0 20px;
+      color: #aab5c9;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .clear-btn {
+      width: 100%;
+      padding: 12px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: 0.15s ease;
+    }
+
+    .clear-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    #historyList {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .history-item:hover {
+      background: rgba(95, 232, 255, 0.12);
+      border-color: #5fe8ff;
+    }
+
+    .entry-info {
+      text-align: left;
+    }
+
+    .entry-info strong {
+      display: block;
+      color: #5fe8ff;
+      font-size: 1.15rem;
+    }
+
+    .entry-info span {
+      display: block;
+      color: #edf3ff;
+      font-size: 0.85rem;
+      margin: 2px 0;
+    }
+
+    .entry-info small {
+      color: #aab5c9;
+      font-size: 0.75rem;
+    }
+
+    .delete-entry {
+      border: 0;
+      background: transparent;
+      color: #ff5277;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .delete-entry:hover {
+      background: rgba(255, 82, 119, 0.15);
+    }
+
+    #emptyMessage {
+      text-align: center;
+      color: #aab5c9;
+      font-size: 0.9rem;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <a href="metronom.html" class="back-btn">
+      ← Înapoi
+    </a>
+
+    <svg class="icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+      <circle cx="32" cy="32" r="24" stroke-width="3"/>
+      <path d="M32 16V32L42 38" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+
+    <h1>Sesiuni salvate</h1>
+    <p>Apasă pe o sesiune ca să setezi automat metronomul la acel tempo!</p>
+
+    <button class="clear-btn" id="clearButton" type="button">Șterge istoricul</button>
+
+    <ul id="historyList"></ul>
+    <div id="emptyMessage">Nu ai nicio sesiune înregistrată.</div>
+  </main>
+
+  <script>
+    const storageKey = "metronomeHistory";
+    const historyList = document.getElementById("historyList");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function showHistory() {
+      const history = getHistory();
+      historyList.innerHTML = "";
+      emptyMessage.style.display = history.length === 0 ? "block" : "none";
+
+      history.forEach((entry, index) => {
+        const item = document.createElement("li");
+        item.className = "history-item";
+
+        const info = document.createElement("div");
+        info.className = "entry-info";
+
+        const bpm = document.createElement("strong");
+        bpm.textContent = entry.bpm + " BPM";
+
+        const sound = document.createElement("span");
+        sound.textContent = entry.sound || "Ton Standard";
+
+        const date = document.createElement("small");
+        date.textContent = entry.date;
+
+        info.appendChild(bpm);
+        info.appendChild(sound);
+        info.appendChild(date);
+
+        // Cand apasa pe un istoric, se salveaza BPM-ul dorit si se reintoarce singur
+        item.addEventListener("click", (e) => {
+          if (e.target.classList.contains("delete-entry")) return;
+          localStorage.setItem("selectedBpmFromHistory", entry.bpm);
+          window.location.href = "metronom.html";
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "delete-entry";
+        deleteButton.type = "button";
+        deleteButton.textContent = "Șterge";
+
+        deleteButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const currentHist = getHistory();
+          currentHistory = currentHist.filter((_, i) => i !== index);
+          localStorage.setItem(storageKey, JSON.stringify(currentHistory));
+          showHistory();
+        });
+
+        item.appendChild(info);
+        item.appendChild(deleteButton);
+        historyList.appendChild(item);
+      });
+    }
+
+    document.getElementById("clearButton").addEventListener("click", () => {
+      if (getHistory().length === 0) return;
+      if (confirm("Sigur vrei să ștergi tot istoricul?")) {
+        localStorage.removeItem(storageKey);
+        showHistory();
+      }
+    });
+
+    showHistory();
+  </script>
+</body>
+</html>

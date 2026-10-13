@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio Piesă</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 15px;
+      color: #edf3ff;
+      background: radial-gradient(ellipse at 15% 15%, #162447 0%, transparent 50%),
+                  radial-gradient(ellipse at 85% 85%, #0f3057 0%, transparent 45%),
+                  #07090e;
+    }
+
+    .player-card {
+      width: 100%;
+      max-width: 460px;
+      padding: 34px 28px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 1.4rem;
+    }
+
+    .edit-icon {
+      background: transparent;
+      border: 0;
+      color: #65e8ff;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .edit-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+    }
+
+    .meta-time {
+      color: #8b94a8;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    /* Derulare Fluidă Personalizată */
+    .timeline-container {
+      width: 100%;
+      margin-bottom: 26px;
+    }
+
+    .timeline {
+      width: 100%;
+      height: 6px;
+      accent-color: #65e8ff;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .time-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #8b94a8;
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Butoane Player */
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 22px;
+      margin-bottom: 30px;
+    }
+
+    .play-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #07090e;
+      border: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+      transition: 0.15s ease;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+    }
+
+    .play-btn svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+    }
+
+    /* Modul Reverb / Ecou */
+    .reverb-panel {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(101, 232, 255, 0.2);
+      background: rgba(101, 232, 255, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .reverb-title {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #65e8ff;
+      margin-bottom: 12px;
+    }
+
+    .reverb-btn {
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: #edf3ff;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .reverb-btn.active {
+      background: rgba(101, 232, 255, 0.2);
+      border-color: #65e8ff;
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(101, 232, 255, 0.3);
+    }
+
+    /* Meniu acțiuni */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .action-btn {
+      padding: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: #edf3ff;
+      text-decoration: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #65e8ff;
+    }
+
+    .action-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #65e8ff;
+    }
+
+    .action-btn.delete {
+      grid-column: span 2;
+    }
+
+    .action-btn.delete:hover {
+      background: rgba(255, 82, 119, 0.15);
+      border-color: #ff5277;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="player-card">
+    <div class="title-group">
+      <h1 id="recordTitle">Se încarcă...</h1>
+      <button class="edit-icon" id="editTitleBtn" title="Editează numele">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="meta-time" id="recordMeta">...</div>
+
+    <!-- Timeline fluid de derulare -->
+    <div class="timeline-container">
+      <input type="range" class="timeline" id="progressSlider" min="0" max="100" value="0">
+      <div class="time-labels">
+        <span id="currentTime">00:00</span>
+        <span id="durationTime">00:00</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <button class="play-btn" id="playBtn" type="button">
+        <!-- Play SVG -->
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+
+    <!-- Panou Reverb -->
+    <div class="reverb-panel">
+      <div class="reverb-title">Efect Acustic</div>
+      <button class="reverb-btn" id="reverbBtn" type="button">Ecou Sală de Concert</button>
+    </div>
+
+    <!-- Acțiuni -->
+    <div class="actions-grid">
+      <button class="action-btn" id="publishBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        Publică
+      </button>
+
+      <a class="action-btn" id="downloadBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Descarcă
+      </a>
+
+      <button class="action-btn delete" id="deleteBtn" type="button">
+        Șterge piesa
+      </button>
+    </div>
+  </main>
+
+  <script>
+    let db = null;
+    let record = null;
+    let audio = null;
+
+    let audioCtx = null;
+    let source = null;
+    let convolver = null;
+    let gainNode = null;
+    let reverbActive = false;
+
+    const recordTitle = document.getElementById("recordTitle");
+    const recordMeta = document.getElementById("recordMeta");
+    const progressSlider = document.getElementById("progressSlider");
+    const currentTimeText = document.getElementById("currentTime");
+    const durationTimeText = document.getElementById("durationTime");
+    const playBtn = document.getElementById("playBtn");
+    const playIcon = document.getElementById("playIcon");
+    const reverbBtn = document.getElementById("reverbBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const editTitleBtn = document.getElementById("editTitleBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    function formatTime(s) {
+      const m = String(Math.floor(s / 60)).padStart(2, "0");
+      const sec = String(Math.floor(s % 60)).padStart(2, "0");
+      return m + ":" + sec;
+    }
+
+    // Deschide baza de date IndexedDB
+    function openDB() {
+      return new Promise((resolve) => {
+        const req = indexedDB.open("StudioRecordsDB", 1);
+        req.onsuccess = (e) => resolve(e.target.result);
+      });
+    }
+
+    // Încarcă înregistrarea selectată
+    async function loadRecord() {
+      const params = new URLSearchParams(window.location.search);
+      const recId = params.get("id");
+      if (!recId) return;
+
+      db = await openDB();
+      const tx = db.transaction("records", "readonly");
+      const req = tx.objectStore("records").get(recId);
+
+      req.onsuccess = () => {
+        record = req.result;
+        if (!record) return;
+
+        recordTitle.textContent = record.title;
+        recordMeta.textContent = record.date;
+        durationTimeText.textContent = record.duration;
+
+        // Creează obiectul audio
+        const audioUrl = URL.createObjectURL(record.blob);
+        audio = new Audio(audioUrl);
+
+        downloadBtn.href = audioUrl;
+        downloadBtn.download = record.title + ".webm";
+
+        // Actualizare timeline la redare
+        audio.addEventListener("timeupdate", () => {
+          if (!audio.duration) return;
+          const pct = (audio.currentTime / audio.duration) * 100;
+          progressSlider.value = pct;
+          currentTimeText.textContent = formatTime(audio.currentTime);
+        });
+
+        audio.addEventListener("loadedmetadata", () => {
+          durationTimeText.textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener("ended", () => {
+          playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        });
+      };
+    }
+
+    // Activare motor audio avansat pentru Reverb
+    function setupAudioNodes() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      source = audioCtx.createMediaElementSource(audio);
+      gainNode = audioCtx.createGain();
+
+      // Generăm un răspuns la impuls pentru ecou de sală de concert
+      convolver = audioCtx.createConvolver();
+      convolver.buffer = createImpulseResponse(2.5, 2.0); // 2.5 secunde de ecou
+
+      source.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+    }
+
+    function createImpulseResponse(duration, decay) {
+      const sampleRate = audioCtx.sampleRate;
+      const length = sampleRate * duration;
+      const impulse = audioCtx.createBuffer(2, length, sampleRate);
+      for (let channel = 0; i < 2; channel++) {
+        const channelData = impulse.getChannelData(channel);
+        for (let i = 0; i < length; i++) {
+          channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+        }
+      }
+      return impulse;
+    }
+
+    // Play / Pause
+    playBtn.addEventListener("click", () => {
+      if (!audio) return;
+      setupAudioNodes();
+
+      if (audioCtx.state === "suspended") audioCtx.resume();
+
+      if (audio.paused) {
+        audio.play();
+        playIcon.innerHTML = '<rect x="6" y="19" width="4" height="14"/><rect x="14" y="19" width="4" height="14"/>';
+      } else {
+        audio.pause();
+        playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      }
+    });
+
+    // Derulare cu sliderul
+    progressSlider.addEventListener("input", () => {
+      if (!audio || !audio.duration) return;
+      audio.currentTime = (progressSlider.value / 100) * audio.duration;
+    });
+
+    // Toggle Reverb
+    reverbBtn.addEventListener("click", () => {
+      if (!audio) return;
+      setupAudioNodes();
+
+      reverbActive = !reverbActive;
+      reverbBtn.classList.toggle("active", reverbActive);
+
+      source.disconnect();
+      if (reverbActive) {
+        source.connect(convolver);
+        convolver.connect(audioCtx.destination);
+      } else {
+        source.connect(audioCtx.destination);
+      }
+    });
+
+    // Editează Nume
+    editTitleBtn.addEventListener("click", async () => {
+      const newName = prompt("Noul nume al înregistrării:", record.title);
+      if (newName && newName.trim() !== "") {
+        record.title = newName.trim();
+        recordTitle.textContent = record.title;
+
+        const tx = db.transaction("records", "readwrite");
+        tx.objectStore("records").put(record);
+      }
+    });
+
+    // Șterge
+    deleteBtn.addEventListener("click", async () => {
+      if (confirm("Sigur ștergi această înregistrare?")) {
+        const tx = db.transaction("records", "readwrite");
+        tx.objectStore("records").delete(record.id);
+        alert("Înregistrare ștearsă.");
+        window.close();
+      }
+    });
+
+    loadRecord();
+  </script>
+</body>
+</html>

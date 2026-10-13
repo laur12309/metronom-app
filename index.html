@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+
+  <title>Metronom Studio</title>
+
+  <link rel="manifest" href="./manifest.json">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      color: #edf4ff;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(53,105,208,.3), transparent 42%),
+        linear-gradient(145deg, #070b14, #0b1220 55%, #080d17);
+    }
+
+    main {
+      width: min(100%, 380px);
+      padding: 30px 24px;
+      border: 1px solid rgba(176,209,255,.18);
+      border-radius: 26px;
+      background: rgba(13,23,43,.8);
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+
+    h1 {
+      color: #d9e8ff;
+      font-size: 1.45rem;
+    }
+
+    p {
+      color: #98a9c4;
+      line-height: 1.5;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 22px;
+      color: #06101a;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 22px;
+      background: linear-gradient(110deg, #72f0ff, #6a9dff);
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Metronom Studio</h1>
+    <p>Se deschide aplicația…</p>
+    <a href="./metronom.html">Deschide metronomul</a>
+  </main>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .catch(function (error) {
+            console.error("Service worker-ul nu s-a înregistrat:", error);
+          });
+      });
+    }
+
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        window.location.replace("./metronom.html");
+      }, 700);
+    });
+  </script>
+</body>
+</html>
