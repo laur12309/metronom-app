@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>Metronom Studio</title>
+  <link rel="manifest" href="./manifest.json">
+
+  <style>
+    :root {
+      --text: #edf4ff;
+      --muted: #98a9c4;
+      --cyan: #63eaff;
+      --line: rgba(176, 209, 255, .16);
+      --glass: rgba(13, 23, 43, .78);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px 15px 120px;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 12% 8%, rgba(53, 105, 208, .3), transparent 42%),
+        radial-gradient(ellipse at 90% 55%, rgba(57, 201, 231, .13), transparent 38%),
+        linear-gradient(145deg, #070b14, #0b1220 55%, #080d17);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .main-card {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 28px 22px;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)),
+        var(--glass);
+      box-shadow: 0 28px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.08);
+      backdrop-filter: blur(24px);
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      color: #d9e8ff;
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .tempo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .tempo-button {
+      width: 44px;
+      height: 44px;
+      color: var(--cyan);
+      font-size: 1.6rem;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      transition: .2s ease;
+    }
+
+    .tempo-button:hover {
+      border-color: var(--cyan);
+      background: rgba(99,234,255,.15);
+      transform: scale(1.06);
+    }
+
+    .tempo-display {
+      min-width: 120px;
+      color: white;
+      font-size: 3.8rem;
+      font-weight: 700;
+      text-shadow: 0 0 25px rgba(99,234,255,.3);
+    }
+
+    .bpm-label {
+      margin: 4px 0 18px;
+      color: var(--muted);
+      font-size: .82rem;
+      letter-spacing: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 20px;
+      accent-color: var(--cyan);
+    }
+
+    .main-button {
+      width: 100%;
+      max-width: 260px;
+      padding: 14px;
+      color: #06101a;
+      font-weight: 700;
+      border: 0;
+      border-radius: 28px;
+      background: linear-gradient(110deg, #72f0ff, #6a9dff);
+      box-shadow: 0 8px 26px rgba(71,133,255,.25);
+      transition: .2s ease;
+    }
+
+    .main-button:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+    }
+
+    .main-button.running {
+      color: #fff;
+      background: linear-gradient(110deg, #e34d77, #a34fff);
+      box-shadow: 0 8px 26px rgba(227,77,119,.3);
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin: 20px 0;
+    }
+
+    .dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      transition: .1s ease;
+    }
+
+    .dot.strong {
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+    }
+
+    .dot.playing {
+      outline: 2px solid white;
+      outline-offset: 3px;
+      transform: scale(1.2);
+    }
+
+    .rhythm-label {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .divider {
+      height: 1px;
+      margin: 22px 0;
+      background: linear-gradient(90deg, transparent, rgba(176,209,255,.2), transparent);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .small-card {
+      min-width: 0;
+      min-height: 140px;
+      padding: 16px 10px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .card-title {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: .75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .timer {
+      margin: 12px 0;
+      color: var(--cyan);
+      font-size: 1.35rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .frequency {
+      min-height: 24px;
+      margin-bottom: 12px;
+      color: #d2caff;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .small-button {
+      padding: 9px 12px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.06);
+      transition: .15s ease;
+    }
+
+    .small-button:hover {
+      background: rgba(255,255,255,.12);
+    }
+
+    .small-button.active {
+      color: #ff91a7;
+      border-color: #ff5277;
+      background: rgba(255,82,119,.2);
+    }
+
+    /* Butoanele Cronometru și Temporizator stau unul lângă altul */
+    .study-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .study-tab {
+      flex: 1 1 0;
+      padding: 7px 4px;
+      font-size: .72rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .study-tab.active {
+      color: var(--cyan);
+      border-color: rgba(99,234,255,.55);
+      background: rgba(99,234,255,.12);
+    }
+
+    .meditation-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .study-label {
+      display: block;
+      margin: 10px 0 7px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .study-input {
+      width: 100%;
+      max-width: 145px;
+      padding: 9px 10px;
+      color: var(--text);
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: rgba(255,255,255,.06);
+    }
+
+    .study-input:focus {
+      border-color: var(--cyan);
+    }
+
+    .goal-card {
+      margin-top: 12px;
+      padding: 18px 14px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .goal-heading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .goal-heading .card-title {
+      margin: 0;
+    }
+
+    .goal-edit-button {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 7px;
+      color: var(--cyan);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(99,234,255,.08);
+    }
+
+    .goal-edit-button svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .goal-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .goal-circle {
+      width: 112px;
+      height: 112px;
+      flex: 0 0 112px;
+      transform: rotate(-90deg);
+    }
+
+    .goal-circle-track,
+    .goal-circle-progress {
+      fill: none;
+      stroke-width: 9;
+    }
+
+    .goal-circle-track {
+      stroke: rgba(255,255,255,.12);
+    }
+
+    .goal-circle-progress {
+      stroke: var(--cyan);
+      stroke-linecap: round;
+      stroke-dasharray: 264;
+      stroke-dashoffset: 264;
+      transition: stroke-dashoffset .35s ease;
+    }
+
+    .goal-info {
+      min-width: 0;
+      max-width: 220px;
+      text-align: left;
+    }
+
+    .goal-remaining {
+      color: var(--cyan);
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .goal-caption {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .goal-edit-panel {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .goal-edit-panel[hidden],
+    [hidden] {
+      display: none !important;
+    }
+
+    .tools-title {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: .76rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .tool-card {
+      display: grid;
+      justify-items: center;
+      gap: 7px;
+      padding: 13px 6px;
+      color: #c8d7ee;
+      text-align: center;
+      text-decoration: none;
+      font-size: .74rem;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(255,255,255,.035);
+      transition: .18s ease;
+    }
+
+    .tool-card:hover {
+      color: var(--cyan);
+      border-color: rgba(99,234,255,.4);
+      background: rgba(99,234,255,.08);
+      transform: translateY(-2px);
+    }
+
+    .tool-card svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      right: 14px;
+      bottom: 13px;
+      left: 14px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-around;
+      max-width: 520px;
+      margin: auto;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(10,16,29,.92);
+      box-shadow: 0 12px 38px rgba(0,0,0,.45);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 44px;
+      color: #9daec8;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      text-decoration: none;
+      transition: .2s ease;
+    }
+
+    .nav-item.active,
+    .nav-item:hover {
+      color: var(--cyan);
+      background: rgba(99,234,255,.12);
+    }
+
+    .nav-item svg {
+      width: 23px;
+      height: 23px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .more-menu {
+      position: fixed;
+      right: 18px;
+      bottom: 76px;
+      z-index: 11;
+      display: none;
+      width: min(350px, calc(100% - 36px));
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(13,18,29,.97);
+      box-shadow: 0 20px 55px rgba(0,0,0,.65);
+      backdrop-filter: blur(22px);
+    }
+
+    .more-menu.open {
+      display: grid;
+    }
+
+    .more-item {
+      padding: 11px;
+      color: var(--text);
+      font-size: .78rem;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(3,7,15,.75);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .tone-modal {
+      width: 100%;
+      max-width: 350px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(15,23,40,.98);
+      box-shadow: 0 24px 70px #000;
+      text-align: left;
+    }
+
+    .tone-modal h2 {
+      margin: 0 0 14px;
+      color: #d9e8ff;
+      font-size: 1.05rem;
+    }
+
+    .tone-list {
+      display: grid;
+      gap: 8px;
+      max-height: 280px;
+      overflow: auto;
+    }
+
+    .tone-option {
+      padding: 13px;
+      color: var(--text);
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .tone-option.selected {
+      border-color: var(--cyan);
+      background: rgba(99,234,255,.12);
+    }
+
+    .back-modal-button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 11px;
+      color: var(--cyan);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(99,234,255,.08);
+    }
+
+    @media (max-width: 370px) {
+      .main-card {
+        padding: 24px 14px;
+      }
+
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .goal-content {
+        gap: 10px;
+      }
+
+      .goal-circle {
+        width: 92px;
+        height: 92px;
+        flex-basis: 92px;
+      }
+
+      .goal-remaining {
+        font-size: .82rem;
+      }
+
+      .small-button {
+        padding: 8px 9px;
+        font-size: .78rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="main-card">
+    <h1>Metronom</h1>
+
+    <div class="tempo-row">
+      <button class="tempo-button" id="minusButton" type="button" aria-label="Scade tempoul">−</button>
+      <div class="tempo-display" id="tempoDisplay">100</div>
+      <button class="tempo-button" id="plusButton" type="button" aria-label="Crește tempoul">+</button>
+    </div>
+
+    <div class="bpm-label">BPM</div>
+    <input id="tempoSlider" type="range" min="40" max="220" value="100" aria-label="Tempou">
+
+    <button class="main-button" id="metronomeButton" type="button">Start</button>
+
+    <div class="dots" id="beatDots"></div>
+    <div class="rhythm-label" id="rhythmLabel"></div>
+
+    <div class="divider"></div>
+
+    <div class="cards">
+      <section class="small-card">
+        <div class="card-title">Studiu</div>
+
+        <div class="study-tabs">
+          <button class="small-button study-tab active" id="stopwatchTab" type="button">Cronometru</button>
+          <button class="small-button study-tab" id="timerTab" type="button">Temporizator</button>
+        </div>
+
+        <div id="stopwatchPanel">
+          <div class="timer" id="studyTimer">00:00:00</div>
+          <button class="small-button" id="studyButton" type="button">Start</button>
+        </div>
+
+        <div id="timerPanel" hidden>
+          <label class="study-label" for="timerHours">Durată în ore</label>
+          <input class="study-input" id="timerHours" type="number" min="1" max="24" value="1">
+          <div class="timer" id="countdownDisplay">01:00:00</div>
+          <button class="small-button" id="countdownButton" type="button">Pornește</button>
+        </div>
+      </section>
+
+      <section class="small-card">
+        <div class="card-title">Meditație</div>
+        <div class="frequency" id="frequencyName">Ton 1</div>
+        <div class="meditation-buttons">
+          <button class="small-button" id="meditationButton" type="button">Start</button>
+          <button class="small-button" id="frequencyButton" type="button">Tonuri</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="goal-card">
+      <div class="goal-heading">
+        <div class="card-title">Obiectiv zilnic</div>
+        <button
+          class="goal-edit-button"
+          id="editGoalButton"
+          type="button"
+          aria-label="Editează obiectivul zilnic"
+          title="Editează obiectivul zilnic"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="goal-content">
+        <svg class="goal-circle" viewBox="0 0 100 100" aria-label="Cercul progresului zilnic">
+          <circle class="goal-circle-track" cx="50" cy="50" r="42"></circle>
+          <circle class="goal-circle-progress" id="dailyProgressCircle" cx="50" cy="50" r="42"></circle>
+        </svg>
+
+        <div class="goal-info">
+          <div class="goal-remaining" id="goalRemaining">Mai ai 60 minute până la obiectiv.</div>
+          <div class="goal-caption" id="dailyProgressText">0 din 60 minute</div>
+        </div>
+      </div>
+
+      <div class="goal-edit-panel" id="goalEditPanel" hidden>
+        <label class="study-label" for="goalMinutes">Obiectiv în minute</label>
+        <input class="study-input" id="goalMinutes" type="number" min="1" max="1440" value="60">
+        <button class="small-button" id="saveGoalButton" type="button">Salvează</button>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+    <div class="tools-title">Unelte</div>
+
+    <div class="tools-grid">
+      <a class="tool-card" href="sunete.html">
+        <svg viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
+        </svg>
+        Sunete
+      </a>
+
+      <a class="tool-card" href="ritmuri.html">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 20V9M10 20V4M16 20v-7M22 20V6"></path>
+        </svg>
+        Ritmuri
+      </a>
+
+      <a class="tool-card" href="rec.html">
+        <svg viewBox="0 0 24 24">
+          <rect x="8" y="3" width="8" height="13" rx="4"></rect>
+          <path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3M9 22h6"></path>
+        </svg>
+        Înregistrări
+      </a>
+
+      <a class="tool-card" href="istoric.html">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 2"></path>
+        </svg>
+        Istoric
+      </a>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="toneModal" aria-hidden="true">
+    <section class="tone-modal" role="dialog" aria-modal="true" aria-labelledby="toneTitle">
+      <h2 id="toneTitle">Tonuri pentru meditație</h2>
+      <div class="tone-list" id="toneList"></div>
+      <button class="back-modal-button" id="closeToneModal" type="button">← Înapoi</button>
+    </section>
+  </div>
+
+  <div class="more-menu" id="moreMenu">
+    <a class="more-item" href="partituri.html">Partituri</a>
+    <a class="more-item" href="rec.html">Înregistrări</a>
+    <a class="more-item" href="pian.html">Pian digital</a>
+    <a class="more-item" href="compune.html">Creează partitură</a>
+    <a class="more-item" href="setari.html" style="grid-column:span 2">Setări și cont</a>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navigare">
+    <a class="nav-item active" href="metronom.html" title="Metronom" aria-label="Metronom">
+      <svg viewBox="0 0 24 24">
+        <path d="M7 21h10L15.5 8h-7z"></path>
+        <path d="m12 17 3-8"></path>
+        <circle cx="12" cy="17" r="1"></circle>
+      </svg>
+    </a>
+
+    <a class="nav-item" href="practice-history.html" title="Istoric de studiu" aria-label="Istoric de studiu">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 7v5l3 2"></path>
+      </svg>
+    </a>
+
+    <a class="nav-item" href="tuner.html" title="Tuner" aria-label="Tuner">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"></path>
+      </svg>
+    </a>
+
+    <a class="nav-item" href="teorie.html" title="Teorie" aria-label="Teorie">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 3h14v18H7a2 2 0 0 1-2-2z"></path>
+        <path d="M8 8h8M8 12h8M8 16h5"></path>
+      </svg>
+    </a>
+
+    <button class="nav-item" id="moreButton" type="button" title="Mai mult" aria-label="Mai mult">
+      <svg viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1"></circle>
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+      </svg>
+    </button>
+  </nav>
+
+  <script>
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./service-worker.js").catch(function (error) {
+          console.error("Service worker-ul nu s-a înregistrat:", error);
+        });
+      });
+    }
+
+    /* METRONOM */
+    const CONFIG_KEY = "activeRhythmConfig";
+    const slider = document.getElementById("tempoSlider");
+    const bpmDisplay = document.getElementById("tempoDisplay");
+    const metronomeButton = document.getElementById("metronomeButton");
+    const dots = document.getElementById("beatDots");
+    const rhythmLabel = document.getElementById("rhythmLabel");
+
+    let config = {
+      meter: 4,
+      bpm: 100,
+      pattern: [true, false, false, false],
+      sound: "wood"
+    };
+
+    try {
+      const savedConfig = JSON.parse(localStorage.getItem(CONFIG_KEY));
+      if (savedConfig) config = { ...config, ...savedConfig };
+    } catch (error) {
+      console.warn("Setările ritmului nu au putut fi citite.", error);
+    }
+
+    const savedSound = localStorage.getItem("metronomeSoundType");
+    if (savedSound) config.sound = savedSound;
+
+    config.meter = Math.max(2, Math.min(6, Number(config.meter) || 4));
+    config.bpm = Math.max(40, Math.min(220, Number(config.bpm) || 100));
+    config.pattern = Array.from(
+      { length: config.meter },
+      (_, index) => Boolean(config.pattern && config.pattern[index])
+    );
+
+    if (!config.pattern.some(Boolean)) config.pattern[0] = true;
+
+    slider.value = config.bpm;
+    bpmDisplay.textContent = String(config.bpm);
+    rhythmLabel.textContent =
+      "Măsura " + config.meter + (config.meter === 6 ? "/8" : "/4");
+
+    function renderDots(activeIndex = -1) {
+      dots.innerHTML = "";
+
+      config.pattern.forEach(function (isStrong, index) {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        if (isStrong) dot.classList.add("strong");
+        if (index === activeIndex) dot.classList.add("playing");
+        dots.appendChild(dot);
+      });
+    }
+
+    let audioContext = null;
+
+    function getAudioContext() {
+      if (!audioContext) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContextClass();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      return audioContext;
+    }
+
+    let beatIndex = 0;
+
+    function playMetronomeBeat() {
+      const context = getAudioContext();
+      const now = context.currentTime;
+      const isStrong = Boolean(config.pattern[beatIndex]);
+      const soundType =
+        localStorage.getItem("metronomeSoundType") || config.sound || "wood";
+
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
+
+      if (soundType === "block") {
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(isStrong ? 1000 : 720, now);
+        oscillator.frequency.exponentialRampToValueAtTime(180, now + 0.035);
+        gain.gain.setValueAtTime(isStrong ? 0.55 : 0.3, now);
+      } else if (soundType === "standard" || soundType === "clar") {
+        oscillator.type = "sine";
+        oscillator.frequency.value =
+          soundType === "clar"
+            ? (isStrong ? 1500 : 1100)
+            : (isStrong ? 1000 : 760);
+        gain.gain.setValueAtTime(isStrong ? 0.32 : 0.2, now);
+      } else {
+        oscillator.type = "triangle";
+        oscillator.frequency.setValueAtTime(isStrong ? 560 : 420, now);
+        oscillator.frequency.exponentialRampToValueAtTime(85, now + 0.04);
+        filter.type = "lowpass";
+        filter.frequency.value = isStrong ? 950 : 750;
+        gain.gain.setValueAtTime(isStrong ? 0.55 : 0.32, now);
+      }
+
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      oscillator.connect(filter);
+      filter.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.09);
+
+      renderDots(beatIndex);
+      beatIndex = (beatIndex + 1) % config.meter;
+    }
+
+    let metronomeRunning = false;
+    let metronomeInterval = null;
+
+    function startMetronome() {
+      if (metronomeRunning) return;
+
+      metronomeRunning = true;
+      beatIndex = 0;
+      metronomeButton.textContent = "Stop";
+      metronomeButton.classList.add("running");
+
+      playMetronomeBeat();
+      metronomeInterval = setInterval(
+        playMetronomeBeat,
+        60000 / Number(slider.value)
+      );
+    }
+
+    function stopMetronome() {
+      metronomeRunning = false;
+      clearInterval(metronomeInterval);
+      metronomeInterval = null;
+      beatIndex = 0;
+      metronomeButton.textContent = "Start";
+      metronomeButton.classList.remove("running");
+      renderDots();
+    }
+
+    metronomeButton.addEventListener("click", function () {
+      if (metronomeRunning) stopMetronome();
+      else startMetronome();
+    });
+
+    function setTempo(value) {
+      const tempo = Math.max(40, Math.min(220, Number(value)));
+      slider.value = tempo;
+      bpmDisplay.textContent = String(tempo);
+      config.bpm = tempo;
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+
+      if (metronomeRunning) {
+        clearInterval(metronomeInterval);
+        metronomeInterval = setInterval(playMetronomeBeat, 60000 / tempo);
+      }
+    }
+
+    document.getElementById("minusButton").addEventListener("click", function () {
+      setTempo(Number(slider.value) - 1);
+    });
+
+    document.getElementById("plusButton").addEventListener("click", function () {
+      setTempo(Number(slider.value) + 1);
+    });
+
+    slider.addEventListener("input", function () {
+      setTempo(slider.value);
+    });
+
+    renderDots();
+
+    /* CRONOMETRU, TEMPORIZATOR ȘI OBIECTIV ZILNIC */
+    const STUDY_KEY = "practiceSecondsByDay";
+    const GOAL_KEY = "dailyStudyGoalMinutes";
+
+    const studyTimer = document.getElementById("studyTimer");
+    const studyButton = document.getElementById("studyButton");
+    const stopwatchTab = document.getElementById("stopwatchTab");
+    const timerTab = document.getElementById("timerTab");
+    const stopwatchPanel = document.getElementById("stopwatchPanel");
+    const timerPanel = document.getElementById("timerPanel");
+
+    const timerHoursInput = document.getElementById("timerHours");
+    const countdownDisplay = document.getElementById("countdownDisplay");
+    const countdownButton = document.getElementById("countdownButton");
+
+    const goalMinutesInput = document.getElementById("goalMinutes");
+    const saveGoalButton = document.getElementById("saveGoalButton");
+    const editGoalButton = document.getElementById("editGoalButton");
+    const goalEditPanel = document.getElementById("goalEditPanel");
+    const goalRemaining = document.getElementById("goalRemaining");
+    const dailyProgressText = document.getElementById("dailyProgressText");
+    const dailyProgressCircle = document.getElementById("dailyProgressCircle");
+
+    let studyRunning = false;
+    let studyInterval = null;
+    let lastStudyUpdate = 0;
+
+    let countdownRunning = false;
+    let countdownInterval = null;
+    let countdownEndTime = 0;
+    let countdownRemaining = 3600;
+
+    function getDayKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+
+    function readStudyData() {
+      try {
+        return JSON.parse(localStorage.getItem(STUDY_KEY)) || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function formatStudyTime(totalSeconds) {
+      const seconds = Math.max(0, Math.floor(totalSeconds));
+      const hours = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const rest = String(seconds % 60).padStart(2, "0");
+      return hours + ":" + minutes + ":" + rest;
+    }
+
+    function refreshStudyTimer() {
+      const data = readStudyData();
+      const total = Number(data[getDayKey(new Date())]) || 0;
+      studyTimer.textContent = formatStudyTime(total);
+    }
+
+    function getGoalMinutes() {
+      const saved = Number(localStorage.getItem(GOAL_KEY));
+      return Number.isFinite(saved) && saved >= 1 ? saved : 60;
+    }
+
+    function updateDailyGoal() {
+      const data = readStudyData();
+      const studiedSeconds = Number(data[getDayKey(new Date())]) || 0;
+      const goalMinutes = getGoalMinutes();
+      const goalSeconds = goalMinutes * 60;
+      const progress = Math.min(studiedSeconds / goalSeconds, 1);
+      const circumference = 264;
+
+      goalMinutesInput.value = String(goalMinutes);
+      dailyProgressCircle.style.strokeDashoffset =
+        String(circumference * (1 - progress));
+
+      const studiedMinutes = Math.floor(studiedSeconds / 60);
+      dailyProgressText.textContent =
+        studiedMinutes + " din " + goalMinutes + " minute";
+
+      if (studiedSeconds >= goalSeconds) {
+        goalRemaining.textContent = "Obiectivul zilnic este atins!";
+      } else {
+        const minutesLeft = Math.ceil((goalSeconds - studiedSeconds) / 60);
+        goalRemaining.textContent =
+          "Mai ai " + minutesLeft + " minute până la obiectiv.";
+      }
+    }
+
+    function saveStudyElapsed() {
+      if (!studyRunning) return;
+
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastStudyUpdate) / 1000);
+      if (elapsed < 1) return;
+
+      const data = readStudyData();
+
+      for (let second = 1; second <= elapsed; second++) {
+        const key = getDayKey(new Date(lastStudyUpdate + second * 1000));
+        data[key] = (Number(data[key]) || 0) + 1;
+      }
+
+      lastStudyUpdate += elapsed * 1000;
+      localStorage.setItem(STUDY_KEY, JSON.stringify(data));
+      refreshStudyTimer();
+      updateDailyGoal();
+    }
+
+    studyButton.addEventListener("click", function () {
+      if (!studyRunning) {
+        studyRunning = true;
+        lastStudyUpdate = Date.now();
+        studyButton.textContent = "Stop";
+        studyButton.classList.add("active");
+        studyInterval = setInterval(saveStudyElapsed, 250);
+      } else {
+        saveStudyElapsed();
+        studyRunning = false;
+        clearInterval(studyInterval);
+        studyInterval = null;
+        studyButton.textContent = "Start";
+        studyButton.classList.remove("active");
+        refreshStudyTimer();
+        updateDailyGoal();
+      }
+    });
+
+    function formatCountdown(totalSeconds) {
+      const seconds = Math.max(0, Math.ceil(totalSeconds));
+      const hours = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const rest = String(seconds % 60).padStart(2, "0");
+      return hours + ":" + minutes + ":" + rest;
+    }
+
+    function updateCountdownDisplay() {
+      countdownDisplay.textContent = formatCountdown(countdownRemaining);
+    }
+
+    function stopCountdown(finished) {
+      countdownRunning = false;
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      countdownButton.textContent = finished ? "Pornește din nou" : "Pornește";
+      countdownButton.classList.remove("active");
+
+      if (finished) countdownRemaining = 0;
+      updateCountdownDisplay();
+    }
+
+    countdownButton.addEventListener("click", function () {
+      if (countdownRunning) {
+        countdownRemaining = Math.max(
+          0,
+          Math.ceil((countdownEndTime - Date.now()) / 1000)
+        );
+        stopCountdown(false);
+        return;
+      }
+
+      if (countdownRemaining <= 0) {
+        const hours = Math.max(
+          1,
+          Math.min(24, Number(timerHoursInput.value) || 1)
+        );
+        timerHoursInput.value = String(hours);
+        countdownRemaining = hours * 3600;
+      }
+
+      countdownEndTime = Date.now() + countdownRemaining * 1000;
+      countdownRunning = true;
+      countdownButton.textContent = "Pauză";
+      countdownButton.classList.add("active");
+
+      countdownInterval = setInterval(function () {
+        countdownRemaining = Math.max(
+          0,
+          Math.ceil((countdownEndTime - Date.now()) / 1000)
+        );
+        updateCountdownDisplay();
+
+        if (countdownRemaining <= 0) {
+          stopCountdown(true);
+          alert("Timpul de studiu s-a terminat!");
+        }
+      }, 250);
+    });
+
+    timerHoursInput.addEventListener("input", function () {
+      if (countdownRunning) return;
+
+      const hours = Math.max(
+        1,
+        Math.min(24, Number(timerHoursInput.value) || 1)
+      );
+      countdownRemaining = hours * 3600;
+      updateCountdownDisplay();
+      countdownButton.textContent = "Pornește";
+    });
+
+    stopwatchTab.addEventListener("click", function () {
+      stopwatchPanel.hidden = false;
+      timerPanel.hidden = true;
+      stopwatchTab.classList.add("active");
+      timerTab.classList.remove("active");
+    });
+
+    timerTab.addEventListener("click", function () {
+      stopwatchPanel.hidden = true;
+      timerPanel.hidden = false;
+      timerTab.classList.add("active");
+      stopwatchTab.classList.remove("active");
+    });
+
+    editGoalButton.addEventListener("click", function () {
+      goalEditPanel.hidden = !goalEditPanel.hidden;
+    });
+
+    saveGoalButton.addEventListener("click", function () {
+      const goal = Math.max(
+        1,
+        Math.min(1440, Number(goalMinutesInput.value) || 60)
+      );
+      localStorage.setItem(GOAL_KEY, String(goal));
+      goalMinutesInput.value = String(goal);
+      goalEditPanel.hidden = true;
+      updateDailyGoal();
+    });
+
+    goalMinutesInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") saveGoalButton.click();
+    });
+
+    window.addEventListener("pagehide", saveStudyElapsed);
+
+    refreshStudyTimer();
+    updateDailyGoal();
+    updateCountdownDisplay();
+
+    /* TONURI PENTRU MEDITAȚIE */
+    const tones = [
+      { name: "Ton 1", frequency: 432, volume: 0.045 },
+      { name: "Ton 2", frequency: 528, volume: 0.055 },
+      { name: "Ton 3", frequency: 396, volume: 0.045 },
+      { name: "Ton 4", frequency: 440, volume: 0.06 },
+      { name: "Ton 5", frequency: 392, volume: 0.05 },
+      { name: "Ton 6", frequency: 480, volume: 0.045 }
+    ];
+
+    const storedToneIndex = Number(localStorage.getItem("meditationToneIndex"));
+    let toneIndex =
+      Number.isInteger(storedToneIndex) &&
+      storedToneIndex >= 0 &&
+      storedToneIndex < tones.length
+        ? storedToneIndex
+        : 0;
+
+    const frequencyName = document.getElementById("frequencyName");
+    const meditationButton = document.getElementById("meditationButton");
+    const toneModal = document.getElementById("toneModal");
+    const toneList = document.getElementById("toneList");
+
+    let meditationRunning = false;
+    let meditationOscillator = null;
+    let meditationGain = null;
+
+    function showToneName() {
+      frequencyName.textContent = tones[toneIndex].name;
+    }
+
+    function renderTones() {
+      toneList.innerHTML = "";
+
+      tones.forEach(function (tone, index) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className =
+          "tone-option" + (index === toneIndex ? " selected" : "");
+        button.textContent = tone.name;
+
+        button.addEventListener("click", function () {
+          toneIndex = index;
+          localStorage.setItem("meditationToneIndex", String(index));
+          showToneName();
+          renderTones();
+
+          if (meditationRunning && meditationOscillator && meditationGain) {
+            const context = getAudioContext();
+            meditationOscillator.frequency.setValueAtTime(
+              tone.frequency,
+              context.currentTime
+            );
+            meditationGain.gain.setTargetAtTime(
+              tone.volume,
+              context.currentTime,
+              0.12
+            );
+          }
+        });
+
+        toneList.appendChild(button);
+      });
+    }
+
+    document.getElementById("frequencyButton").addEventListener("click", function () {
+      renderTones();
+      toneModal.classList.add("open");
+      toneModal.setAttribute("aria-hidden", "false");
+    });
+
+    function closeToneModal() {
+      toneModal.classList.remove("open");
+      toneModal.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("closeToneModal").addEventListener("click", closeToneModal);
+
+    toneModal.addEventListener("click", function (event) {
+      if (event.target === toneModal) closeToneModal();
+    });
+
+    meditationButton.addEventListener("click", function () {
+      const context = getAudioContext();
+
+      if (!meditationRunning) {
+        const tone = tones[toneIndex];
+        meditationOscillator = context.createOscillator();
+        meditationGain = context.createGain();
+
+        meditationOscillator.type = "sine";
+        meditationOscillator.frequency.value = tone.frequency;
+
+        meditationGain.gain.setValueAtTime(0.001, context.currentTime);
+        meditationGain.gain.linearRampToValueAtTime(
+          tone.volume,
+          context.currentTime + 0.8
+        );
+
+        meditationOscillator.connect(meditationGain);
+        meditationGain.connect(context.destination);
+        meditationOscillator.start();
+
+        meditationRunning = true;
+        meditationButton.textContent = "Stop";
+        meditationButton.classList.add("active");
+      } else {
+        const oscillator = meditationOscillator;
+        const gain = meditationGain;
+
+        gain.gain.setTargetAtTime(0.001, context.currentTime, 0.15);
+
+        setTimeout(function () {
+          try {
+            oscillator.stop();
+            oscillator.disconnect();
+            gain.disconnect();
+          } catch (error) {}
+        }, 600);
+
+        meditationOscillator = null;
+        meditationGain = null;
+        meditationRunning = false;
+        meditationButton.textContent = "Start";
+        meditationButton.classList.remove("active");
+      }
+    });
+
+    showToneName();
+
+    /* MENIUL „MAI MULT” */
+    const moreButton = document.getElementById("moreButton");
+    const moreMenu = document.getElementById("moreMenu");
+
+    moreButton.addEventListener("click", function () {
+      moreMenu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!moreButton.contains(event.target) && !moreMenu.contains(event.target)) {
+        moreMenu.classList.remove("open");
+      }
+    });
+  </script>
+</body>
+</html>
