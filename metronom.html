@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b1220">
   <title>Metronom Studio</title>
-
   <link rel="manifest" href="./manifest.json">
 
   <style>
@@ -33,8 +32,12 @@
         linear-gradient(145deg, #070b14, #0b1220 55%, #080d17);
     }
 
-    button {
+    button,
+    input {
       font: inherit;
+    }
+
+    button {
       cursor: pointer;
     }
 
@@ -174,9 +177,11 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
+      align-items: stretch;
     }
 
     .small-card {
+      min-width: 0;
       min-height: 140px;
       padding: 16px 10px;
       border: 1px solid var(--line);
@@ -193,7 +198,7 @@
     }
 
     .timer {
-      margin-bottom: 12px;
+      margin: 12px 0;
       color: var(--cyan);
       font-size: 1.35rem;
       font-weight: 700;
@@ -209,7 +214,7 @@
     }
 
     .small-button {
-      padding: 9px 15px;
+      padding: 9px 12px;
       color: var(--text);
       border: 1px solid var(--line);
       border-radius: 20px;
@@ -227,10 +232,165 @@
       background: rgba(255,82,119,.2);
     }
 
+    /* Butoanele Cronometru și Temporizator stau unul lângă altul */
+    .study-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .study-tab {
+      flex: 1 1 0;
+      padding: 7px 4px;
+      font-size: .72rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .study-tab.active {
+      color: var(--cyan);
+      border-color: rgba(99,234,255,.55);
+      background: rgba(99,234,255,.12);
+    }
+
     .meditation-buttons {
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 6px;
+    }
+
+    .study-label {
+      display: block;
+      margin: 10px 0 7px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .study-input {
+      width: 100%;
+      max-width: 145px;
+      padding: 9px 10px;
+      color: var(--text);
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: rgba(255,255,255,.06);
+    }
+
+    .study-input:focus {
+      border-color: var(--cyan);
+    }
+
+    .goal-card {
+      margin-top: 12px;
+      padding: 18px 14px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .goal-heading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .goal-heading .card-title {
+      margin: 0;
+    }
+
+    .goal-edit-button {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 7px;
+      color: var(--cyan);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(99,234,255,.08);
+    }
+
+    .goal-edit-button svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .goal-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .goal-circle {
+      width: 112px;
+      height: 112px;
+      flex: 0 0 112px;
+      transform: rotate(-90deg);
+    }
+
+    .goal-circle-track,
+    .goal-circle-progress {
+      fill: none;
+      stroke-width: 9;
+    }
+
+    .goal-circle-track {
+      stroke: rgba(255,255,255,.12);
+    }
+
+    .goal-circle-progress {
+      stroke: var(--cyan);
+      stroke-linecap: round;
+      stroke-dasharray: 264;
+      stroke-dashoffset: 264;
+      transition: stroke-dashoffset .35s ease;
+    }
+
+    .goal-info {
+      min-width: 0;
+      max-width: 220px;
+      text-align: left;
+    }
+
+    .goal-remaining {
+      color: var(--cyan);
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .goal-caption {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .goal-edit-panel {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .goal-edit-panel[hidden],
+    [hidden] {
+      display: none !important;
     }
 
     .tools-title {
@@ -422,8 +582,31 @@
     }
 
     @media (max-width: 370px) {
+      .main-card {
+        padding: 24px 14px;
+      }
+
       .tools-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .goal-content {
+        gap: 10px;
+      }
+
+      .goal-circle {
+        width: 92px;
+        height: 92px;
+        flex-basis: 92px;
+      }
+
+      .goal-remaining {
+        font-size: .82rem;
+      }
+
+      .small-button {
+        padding: 8px 9px;
+        font-size: .78rem;
       }
     }
   </style>
@@ -452,19 +635,70 @@
     <div class="cards">
       <section class="small-card">
         <div class="card-title">Studiu</div>
-        <div class="timer" id="studyTimer">00:00:00</div>
-        <button class="small-button" id="studyButton" type="button">Start</button>
+
+        <div class="study-tabs">
+          <button class="small-button study-tab active" id="stopwatchTab" type="button">Cronometru</button>
+          <button class="small-button study-tab" id="timerTab" type="button">Temporizator</button>
+        </div>
+
+        <div id="stopwatchPanel">
+          <div class="timer" id="studyTimer">00:00:00</div>
+          <button class="small-button" id="studyButton" type="button">Start</button>
+        </div>
+
+        <div id="timerPanel" hidden>
+          <label class="study-label" for="timerHours">Durată în ore</label>
+          <input class="study-input" id="timerHours" type="number" min="1" max="24" value="1">
+          <div class="timer" id="countdownDisplay">01:00:00</div>
+          <button class="small-button" id="countdownButton" type="button">Pornește</button>
+        </div>
       </section>
 
       <section class="small-card">
         <div class="card-title">Meditație</div>
-        <div class="frequency" id="frequencyName">Ambiental</div>
+        <div class="frequency" id="frequencyName">Ton 1</div>
         <div class="meditation-buttons">
           <button class="small-button" id="meditationButton" type="button">Start</button>
           <button class="small-button" id="frequencyButton" type="button">Tonuri</button>
         </div>
       </section>
     </div>
+
+    <section class="goal-card">
+      <div class="goal-heading">
+        <div class="card-title">Obiectiv zilnic</div>
+        <button
+          class="goal-edit-button"
+          id="editGoalButton"
+          type="button"
+          aria-label="Editează obiectivul zilnic"
+          title="Editează obiectivul zilnic"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="goal-content">
+        <svg class="goal-circle" viewBox="0 0 100 100" aria-label="Cercul progresului zilnic">
+          <circle class="goal-circle-track" cx="50" cy="50" r="42"></circle>
+          <circle class="goal-circle-progress" id="dailyProgressCircle" cx="50" cy="50" r="42"></circle>
+        </svg>
+
+        <div class="goal-info">
+          <div class="goal-remaining" id="goalRemaining">Mai ai 60 minute până la obiectiv.</div>
+          <div class="goal-caption" id="dailyProgressText">0 din 60 minute</div>
+        </div>
+      </div>
+
+      <div class="goal-edit-panel" id="goalEditPanel" hidden>
+        <label class="study-label" for="goalMinutes">Obiectiv în minute</label>
+        <input class="study-input" id="goalMinutes" type="number" min="1" max="1440" value="60">
+        <button class="small-button" id="saveGoalButton" type="button">Salvează</button>
+      </div>
+    </section>
 
     <div class="divider"></div>
     <div class="tools-title">Unelte</div>
@@ -561,13 +795,13 @@
   <script>
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./service-worker.js")
-          .catch(function (error) {
-            console.error("Service worker-ul nu s-a înregistrat:", error);
-          });
+        navigator.serviceWorker.register("./service-worker.js").catch(function (error) {
+          console.error("Service worker-ul nu s-a înregistrat:", error);
+        });
       });
     }
 
+    /* METRONOM */
     const CONFIG_KEY = "activeRhythmConfig";
     const slider = document.getElementById("tempoSlider");
     const bpmDisplay = document.getElementById("tempoDisplay");
@@ -626,7 +860,10 @@
         audioContext = new AudioContextClass();
       }
 
-      if (audioContext.state === "suspended") audioContext.resume();
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
       return audioContext;
     }
 
@@ -717,10 +954,7 @@
 
       if (metronomeRunning) {
         clearInterval(metronomeInterval);
-        metronomeInterval = setInterval(
-          playMetronomeBeat,
-          60000 / tempo
-        );
+        metronomeInterval = setInterval(playMetronomeBeat, 60000 / tempo);
       }
     }
 
@@ -738,13 +972,37 @@
 
     renderDots();
 
+    /* CRONOMETRU, TEMPORIZATOR ȘI OBIECTIV ZILNIC */
     const STUDY_KEY = "practiceSecondsByDay";
+    const GOAL_KEY = "dailyStudyGoalMinutes";
+
     const studyTimer = document.getElementById("studyTimer");
     const studyButton = document.getElementById("studyButton");
+    const stopwatchTab = document.getElementById("stopwatchTab");
+    const timerTab = document.getElementById("timerTab");
+    const stopwatchPanel = document.getElementById("stopwatchPanel");
+    const timerPanel = document.getElementById("timerPanel");
+
+    const timerHoursInput = document.getElementById("timerHours");
+    const countdownDisplay = document.getElementById("countdownDisplay");
+    const countdownButton = document.getElementById("countdownButton");
+
+    const goalMinutesInput = document.getElementById("goalMinutes");
+    const saveGoalButton = document.getElementById("saveGoalButton");
+    const editGoalButton = document.getElementById("editGoalButton");
+    const goalEditPanel = document.getElementById("goalEditPanel");
+    const goalRemaining = document.getElementById("goalRemaining");
+    const dailyProgressText = document.getElementById("dailyProgressText");
+    const dailyProgressCircle = document.getElementById("dailyProgressCircle");
 
     let studyRunning = false;
     let studyInterval = null;
     let lastStudyUpdate = 0;
+
+    let countdownRunning = false;
+    let countdownInterval = null;
+    let countdownEndTime = 0;
+    let countdownRemaining = 3600;
 
     function getDayKey(date) {
       const year = date.getFullYear();
@@ -761,15 +1019,48 @@
       }
     }
 
+    function formatStudyTime(totalSeconds) {
+      const seconds = Math.max(0, Math.floor(totalSeconds));
+      const hours = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const rest = String(seconds % 60).padStart(2, "0");
+      return hours + ":" + minutes + ":" + rest;
+    }
+
     function refreshStudyTimer() {
       const data = readStudyData();
       const total = Number(data[getDayKey(new Date())]) || 0;
+      studyTimer.textContent = formatStudyTime(total);
+    }
 
-      const hours = String(Math.floor(total / 3600)).padStart(2, "0");
-      const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-      const seconds = String(total % 60).padStart(2, "0");
+    function getGoalMinutes() {
+      const saved = Number(localStorage.getItem(GOAL_KEY));
+      return Number.isFinite(saved) && saved >= 1 ? saved : 60;
+    }
 
-      studyTimer.textContent = hours + ":" + minutes + ":" + seconds;
+    function updateDailyGoal() {
+      const data = readStudyData();
+      const studiedSeconds = Number(data[getDayKey(new Date())]) || 0;
+      const goalMinutes = getGoalMinutes();
+      const goalSeconds = goalMinutes * 60;
+      const progress = Math.min(studiedSeconds / goalSeconds, 1);
+      const circumference = 264;
+
+      goalMinutesInput.value = String(goalMinutes);
+      dailyProgressCircle.style.strokeDashoffset =
+        String(circumference * (1 - progress));
+
+      const studiedMinutes = Math.floor(studiedSeconds / 60);
+      dailyProgressText.textContent =
+        studiedMinutes + " din " + goalMinutes + " minute";
+
+      if (studiedSeconds >= goalSeconds) {
+        goalRemaining.textContent = "Obiectivul zilnic este atins!";
+      } else {
+        const minutesLeft = Math.ceil((goalSeconds - studiedSeconds) / 60);
+        goalRemaining.textContent =
+          "Mai ai " + minutesLeft + " minute până la obiectiv.";
+      }
     }
 
     function saveStudyElapsed() {
@@ -789,6 +1080,7 @@
       lastStudyUpdate += elapsed * 1000;
       localStorage.setItem(STUDY_KEY, JSON.stringify(data));
       refreshStudyTimer();
+      updateDailyGoal();
     }
 
     studyButton.addEventListener("click", function () {
@@ -806,19 +1098,130 @@
         studyButton.textContent = "Start";
         studyButton.classList.remove("active");
         refreshStudyTimer();
+        updateDailyGoal();
       }
     });
 
-    window.addEventListener("pagehide", saveStudyElapsed);
-    refreshStudyTimer();
+    function formatCountdown(totalSeconds) {
+      const seconds = Math.max(0, Math.ceil(totalSeconds));
+      const hours = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const rest = String(seconds % 60).padStart(2, "0");
+      return hours + ":" + minutes + ":" + rest;
+    }
 
+    function updateCountdownDisplay() {
+      countdownDisplay.textContent = formatCountdown(countdownRemaining);
+    }
+
+    function stopCountdown(finished) {
+      countdownRunning = false;
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      countdownButton.textContent = finished ? "Pornește din nou" : "Pornește";
+      countdownButton.classList.remove("active");
+
+      if (finished) countdownRemaining = 0;
+      updateCountdownDisplay();
+    }
+
+    countdownButton.addEventListener("click", function () {
+      if (countdownRunning) {
+        countdownRemaining = Math.max(
+          0,
+          Math.ceil((countdownEndTime - Date.now()) / 1000)
+        );
+        stopCountdown(false);
+        return;
+      }
+
+      if (countdownRemaining <= 0) {
+        const hours = Math.max(
+          1,
+          Math.min(24, Number(timerHoursInput.value) || 1)
+        );
+        timerHoursInput.value = String(hours);
+        countdownRemaining = hours * 3600;
+      }
+
+      countdownEndTime = Date.now() + countdownRemaining * 1000;
+      countdownRunning = true;
+      countdownButton.textContent = "Pauză";
+      countdownButton.classList.add("active");
+
+      countdownInterval = setInterval(function () {
+        countdownRemaining = Math.max(
+          0,
+          Math.ceil((countdownEndTime - Date.now()) / 1000)
+        );
+        updateCountdownDisplay();
+
+        if (countdownRemaining <= 0) {
+          stopCountdown(true);
+          alert("Timpul de studiu s-a terminat!");
+        }
+      }, 250);
+    });
+
+    timerHoursInput.addEventListener("input", function () {
+      if (countdownRunning) return;
+
+      const hours = Math.max(
+        1,
+        Math.min(24, Number(timerHoursInput.value) || 1)
+      );
+      countdownRemaining = hours * 3600;
+      updateCountdownDisplay();
+      countdownButton.textContent = "Pornește";
+    });
+
+    stopwatchTab.addEventListener("click", function () {
+      stopwatchPanel.hidden = false;
+      timerPanel.hidden = true;
+      stopwatchTab.classList.add("active");
+      timerTab.classList.remove("active");
+    });
+
+    timerTab.addEventListener("click", function () {
+      stopwatchPanel.hidden = true;
+      timerPanel.hidden = false;
+      timerTab.classList.add("active");
+      stopwatchTab.classList.remove("active");
+    });
+
+    editGoalButton.addEventListener("click", function () {
+      goalEditPanel.hidden = !goalEditPanel.hidden;
+    });
+
+    saveGoalButton.addEventListener("click", function () {
+      const goal = Math.max(
+        1,
+        Math.min(1440, Number(goalMinutesInput.value) || 60)
+      );
+      localStorage.setItem(GOAL_KEY, String(goal));
+      goalMinutesInput.value = String(goal);
+      goalEditPanel.hidden = true;
+      updateDailyGoal();
+    });
+
+    goalMinutesInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") saveGoalButton.click();
+    });
+
+    window.addEventListener("pagehide", saveStudyElapsed);
+
+    refreshStudyTimer();
+    updateDailyGoal();
+    updateCountdownDisplay();
+
+    /* TONURI PENTRU MEDITAȚIE */
     const tones = [
-      { name: "Liniște", frequency: 432, volume: 0.045 },
-      { name: "Ambiental", frequency: 528, volume: 0.055 },
-      { name: "Ploaie blândă", frequency: 396, volume: 0.045 },
-      { name: "Valuri", frequency: 440, volume: 0.06 },
-      { name: "Pădure", frequency: 392, volume: 0.05 },
-      { name: "Seară calmă", frequency: 480, volume: 0.045 }
+      { name: "Ton 1", frequency: 432, volume: 0.045 },
+      { name: "Ton 2", frequency: 528, volume: 0.055 },
+      { name: "Ton 3", frequency: 396, volume: 0.045 },
+      { name: "Ton 4", frequency: 440, volume: 0.06 },
+      { name: "Ton 5", frequency: 392, volume: 0.05 },
+      { name: "Ton 6", frequency: 480, volume: 0.045 }
     ];
 
     const storedToneIndex = Number(localStorage.getItem("meditationToneIndex"));
@@ -827,7 +1230,7 @@
       storedToneIndex >= 0 &&
       storedToneIndex < tones.length
         ? storedToneIndex
-        : 1;
+        : 0;
 
     const frequencyName = document.getElementById("frequencyName");
     const meditationButton = document.getElementById("meditationButton");
@@ -860,12 +1263,10 @@
 
           if (meditationRunning && meditationOscillator && meditationGain) {
             const context = getAudioContext();
-
             meditationOscillator.frequency.setValueAtTime(
               tone.frequency,
               context.currentTime
             );
-
             meditationGain.gain.setTargetAtTime(
               tone.volume,
               context.currentTime,
@@ -900,7 +1301,6 @@
 
       if (!meditationRunning) {
         const tone = tones[toneIndex];
-
         meditationOscillator = context.createOscillator();
         meditationGain = context.createGain();
 
@@ -944,6 +1344,7 @@
 
     showToneName();
 
+    /* MENIUL „MAI MULT” */
     const moreButton = document.getElementById("moreButton");
     const moreMenu = document.getElementById("moreMenu");
 
